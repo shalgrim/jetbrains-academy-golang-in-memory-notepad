@@ -3,14 +3,21 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"log"
 	"os"
+	"strconv"
 	"strings"
 )
 
 func main() {
-	const MaxNotes = 5
 	scanner := bufio.NewScanner(os.Stdin)
-	notes := make([]string, 0, MaxNotes)
+	fmt.Println("Enter the maximum number of notes:")
+	scanner.Scan()
+	maxNotes, err := strconv.Atoi(scanner.Text())
+	if err != nil {
+		log.Fatal("Unable to get maxNotes")
+	}
+	notes := make([]string, 0, maxNotes)
 
 	for {
 		fmt.Println("Enter a command and data:")
@@ -19,15 +26,23 @@ func main() {
 		command, data := input[0], strings.Join(input[1:], " ")
 		switch command {
 		case "create":
-			if len(notes) == MaxNotes {
+			if len(notes) == maxNotes {
 				fmt.Println("[Error] Notepad is full")
 			} else {
-				notes = append(notes, data)
-				fmt.Println("[OK] The note was successfully created")
+				if data == "" {
+					fmt.Println("[Error] Missing note argument")
+				} else {
+					notes = append(notes, data)
+					fmt.Println("[OK] The note was successfully created")
+				}
 			}
 		case "list":
-			for i, n := range notes {
-				fmt.Printf("[Info] %d: %s\n", i+1, n)
+			if len(notes) == 0 {
+				fmt.Println("[Info] Notepad is empty")
+			} else {
+				for i, n := range notes {
+					fmt.Printf("[Info] %d: %s\n", i+1, n)
+				}
 			}
 		case "clear":
 			notes = make([]string, 0, 5)
@@ -35,6 +50,8 @@ func main() {
 		case "exit":
 			fmt.Println("[Info] Bye!")
 			os.Exit(0)
+		default:
+			fmt.Println("[Error] Unknown command")
 		}
 	}
 }
